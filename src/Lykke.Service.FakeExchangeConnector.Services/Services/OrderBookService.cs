@@ -38,18 +38,18 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
 
         private IEnumerable<OrderBook> ShakeBooks(IEnumerable<OrderBook> orderBooks)
         {
+            var random = new Random();
+            var delta = (decimal) random.NextDouble();
             return orderBooks.Select(x =>
-                    new OrderBook(x.Source, x.AssetPairId, ShakePrices(x.Asks), ShakePrices(x.Bids), x.Timestamp))
+                    new OrderBook(x.Source, x.AssetPairId, ShakePrices(x.Asks, delta), ShakePrices(x.Bids, delta), x.Timestamp))
                 .ToList();
         }
 
-        private IReadOnlyList<VolumePrice> ShakePrices(IEnumerable<VolumePrice> book)
+        private IReadOnlyList<VolumePrice> ShakePrices(IEnumerable<VolumePrice> book, decimal delta)
         {
-            var random = new Random();
             return book.Select(x =>
                     new VolumePrice(Math.Round(x.Price *
-                                               (1 + _fakeExchangeConnectorSettings.OrderBookDeltaPercentage *
-                                                (decimal) random.NextDouble()),
+                                               (1 + _fakeExchangeConnectorSettings.OrderBookDeltaPercentage * delta),
                         _fakeExchangeConnectorSettings.PriceAccuracy), x.Volume))
                 .ToList();
         }
