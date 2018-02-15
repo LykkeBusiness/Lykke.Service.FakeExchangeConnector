@@ -11,10 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lykke.Common" Version="4.4.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Lykke.SettingsReader, Version=2.0.1.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Users\a.andreev\.nuget\packages\lykke.settingsreader\2.0.1\lib\netstandard2.0\Lykke.SettingsReader.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Lykke.SettingsReader" Version="2.0.1" />
   </ItemGroup>
 </Project>
