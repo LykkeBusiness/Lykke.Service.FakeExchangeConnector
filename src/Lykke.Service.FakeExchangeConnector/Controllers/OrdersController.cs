@@ -55,13 +55,13 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
             if (!(_exchangeCache.Get(orderModel.ExchangeName)?.AcceptOrder ?? true))
                 return BadRequest($"AcceptOrder is false for {orderModel.ExchangeName}");
             
-            var result = _tradingService.CreateOrder(orderModel.ExchangeName, orderModel.Instrument,
+            var result = await _tradingService.CreateOrder(orderModel.ExchangeName, orderModel.Instrument,
                 orderModel.TradeType, orderModel.Price ?? 0, orderModel.Volume);
 
             if (result == null)
                 return BadRequest("No such exchange in config");
 
-            return Ok();
+            return Ok(result);
         }
 
         private static string GetUniqueOrderId(OrderModel orderModel)
