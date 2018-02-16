@@ -14,12 +14,15 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
     {
         private readonly IExchangeCache _exchangeCache;
         private readonly ITradingService _tradingService;
+        private readonly IQuoteService _quoteService;
 
         public OrdersController(IExchangeCache exchangeCache,
-            ITradingService tradingService)
+            ITradingService tradingService,
+            IQuoteService quoteService)
         {
             _exchangeCache = exchangeCache;
             _tradingService = tradingService;
+            _quoteService = quoteService;
         }
 
         /// <summary>
@@ -54,9 +57,15 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
 
             if (!(_exchangeCache.Get(orderModel.ExchangeName)?.AcceptOrder ?? true))
                 return BadRequest($"AcceptOrder is false for {orderModel.ExchangeName}");
+
+            var quote = _quoteService.Get(orderModel.ExchangeName, orderModel.Instrument);
             
-            var result = await _tradingService.CreateOrder(orderModel.ExchangeName, orderModel.Instrument,
-                orderModel.TradeType, orderModel.Price ?? 0, orderModel.Volume);
+            var result = await _tradingService.CreateOrder(
+                orderModel.ExchangeName, 
+                orderModel.Instrument,
+                orderModel.TradeType, 
+                orderModel.Price ?? (orderModel.TradeType == TradeType.Buy ? quote?.Ask : quote?.Bid) ?? 0, 
+                orderModel.Volume);
 
             if (result == null)
                 return BadRequest("No such exchange in config");
