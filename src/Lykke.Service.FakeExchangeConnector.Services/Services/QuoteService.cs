@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -45,6 +46,28 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
                 Bid = bestPriceQuote.Bid,
                 Ask = bestPriceQuote.Ask
             });
+
+            var swappedInstrument = SwapInstrument(bestPriceQuote.Instrument);
+            if (bestPriceQuote.ExchangeName == "bitmex" && swappedInstrument != null && swappedInstrument == "USDBTC")
+                _quoteCache.Set(new ExchangeInstrumentQuote
+                {
+                    ExchangeName = bestPriceQuote.ExchangeName,
+                    Instrument = swappedInstrument,
+                    Base = "",
+                    Quote = "",
+                    Bid = bestPriceQuote.Bid,
+                    Ask = bestPriceQuote.Ask
+                });
+        }
+
+        /// <summary>
+        /// Swaps 6-symbol instruments. just for simplicity.. for USDBTC
+        /// </summary>
+        /// <param name="instrument"></param>
+        /// <returns></returns>
+        private string SwapInstrument(string instrument)
+        {
+            return instrument.Length != 6 ? null : new string(instrument.Skip(3).Concat(instrument.Take(3)).ToArray());
         }
 
         public ExchangeInstrumentQuote Get(string exchangeName, string instrument)

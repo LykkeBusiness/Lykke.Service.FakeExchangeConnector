@@ -34,7 +34,7 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
                 Fee = 0,
                 ExchangeOrderId = Guid.NewGuid().ToString(),
                 ExecutionStatus = OrderExecutionStatus.Fill,
-                ExecType = ExecType.Fill,
+                ExecType = ExecType.Trade,
                 OrderType = OrderType.Market,
                 Success = true
             };
