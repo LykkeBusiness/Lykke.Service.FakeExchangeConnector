@@ -33,10 +33,16 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
                 Type = tradeType,
                 Fee = 0,
                 ExchangeOrderId = Guid.NewGuid().ToString(),
-                ExecutionStatus = OrderExecutionStatus.Fill
+                ExecutionStatus = OrderExecutionStatus.Fill,
+                ExecType = ExecType.Trade,
+                OrderType = OrderType.Market,
+                Success = true
             };
             
             var exchange = _exchangeCache.UpdatePosition(exchangeName, instrument, tradeType, volume);
+
+            if (exchange == null)
+                return null;
             
             //push to rabbit
             await _executionReportPublisher.Publish(executionReport);

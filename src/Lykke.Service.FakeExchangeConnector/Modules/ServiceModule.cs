@@ -66,6 +66,10 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
             builder.RegisterType<OrderBookCache>()
                 .As<IOrderBookCache>()
                 .SingleInstance();
+            
+            builder.RegisterType<QuoteCache>()
+                .As<IQuoteCache>()
+                .SingleInstance();
 
             builder.RegisterType<TradingService>()
                 .As<ITradingService>()
@@ -73,6 +77,10 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
 
             builder.RegisterType<OrderBookService>()
                 .As<IOrderBookService>()
+                .SingleInstance();
+
+            builder.RegisterType<QuoteService>()
+                .As<IQuoteService>()
                 .SingleInstance();
             
             RegisterPeriodicalHandlers(builder);
@@ -93,7 +101,7 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
         
         private void RegisterRabbitMqSubscribers(ContainerBuilder builder)
         {
-            /*builder.RegisterType<OrderBookSubscriber>()
+            builder.RegisterType<OrderBookSubscriber>()
                 .AsSelf()
                 .SingleInstance()
                 .WithParameters(new[]
@@ -103,7 +111,7 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                     new NamedParameter("queueName", _settings.CurrentValue.Rabbit.ExchangeConnectorQuotes.QueueName),
                     new NamedParameter("isDurable", false),
                     new NamedParameter("log", _log)
-                });*/
+                });
         }
 
         private void RegisterRabbitMqPublishers(ContainerBuilder builder)
