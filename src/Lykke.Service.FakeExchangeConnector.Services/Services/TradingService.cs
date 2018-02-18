@@ -22,7 +22,7 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
         }
         
         public async Task<ExecutionReport> CreateOrder(string exchangeName, string instrument, TradeType tradeType, 
-            decimal price, decimal volume)
+            decimal price, decimal volume, bool isPublishToRabbit = true)
         {
             var executionReport = new ExecutionReport
             {
@@ -45,7 +45,8 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
                 return null;
             
             //push to rabbit
-            await _executionReportPublisher.Publish(executionReport);
+            if (isPublishToRabbit)
+                await _executionReportPublisher.Publish(executionReport);
             
             return executionReport;
         }
