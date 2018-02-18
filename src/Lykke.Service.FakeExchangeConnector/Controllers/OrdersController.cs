@@ -91,5 +91,39 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
         {
             throw new NotImplementedException();
         }
+        
+        /// <summary>
+        /// Manually change position to immitate kind of exchange-side event.
+        /// </summary>
+        /// <param name="orderModel">A new order</param>
+        /// <remarks>In the location header of successful response placed an URL for getting info about the order</remarks>
+        [SwaggerOperation("FakeOrder")]
+        [HttpPost("FakeOrder")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> FakeOrder([FromBody] OrderModel orderModel)
+        {
+            if (string.IsNullOrEmpty(orderModel?.ExchangeName)
+                || string.IsNullOrEmpty(orderModel.Instrument)
+                || orderModel.Volume == 0)
+                return BadRequest("Bad model");
+
+            if (!(_exchangeCache.Get(orderModel.ExchangeName)?.AcceptOrder ?? true))
+                return BadRequest($"AcceptOrder is false for {orderModel.ExchangeName}");
+
+            var quote = _quoteService.Get(orderModel.ExchangeName, orderModel.Instrument);
+            
+            var result = await _tradingService.CreateOrder(
+                orderModel.ExchangeName, 
+                orderModel.Instrument,
+                orderModel.TradeType, 
+                orderModel.Price ?? (orderModel.TradeType == TradeType.Buy ? quote?.Ask : quote?.Bid) ?? 0, 
+                orderModel.Volume,
+                false);
+
+            if (result == null)
+                return BadRequest("No such exchange in config");
+
+            return Ok(result);
+        }
     }
 }

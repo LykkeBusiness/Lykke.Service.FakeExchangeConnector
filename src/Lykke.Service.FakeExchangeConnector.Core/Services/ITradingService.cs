@@ -6,7 +6,7 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Services
     public interface ITradingService
     {
         Task<ExecutionReport> CreateOrder(string exchangeName, string instrument, TradeType tradeType,
-            decimal price, decimal volume);
+            decimal price, decimal volume, bool isPublishToRabbit = true);
 
         bool? GetAcceptOrder(string exchangeName);
         bool? SetAcceptOrder(string exchangeName, bool acceptOrder);
