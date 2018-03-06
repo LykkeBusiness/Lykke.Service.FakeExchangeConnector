@@ -24,9 +24,9 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Domain
         
         public DateTime Timestamp { get; private set; }
 
-        public string GetPartitionKey => ExchangeName;
+        public string PartitionKey => ExchangeName;
 
-        public string GetRowKey => Instrument;
+        public string RowKey => Instrument;
         
         public object Clone()
         {

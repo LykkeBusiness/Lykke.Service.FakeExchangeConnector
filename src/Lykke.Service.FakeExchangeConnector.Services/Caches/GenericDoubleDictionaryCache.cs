@@ -54,13 +54,13 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Caches
 
         private void SetNoLock(T item)
         {
-            if(!_cache.TryGetValue(item.GetPartitionKey, out var exchange))
+            if(!_cache.TryGetValue(item.PartitionKey, out var exchange))
             {
-                _cache[item.GetPartitionKey] = new Dictionary<string, T>();
-                exchange = _cache[item.GetPartitionKey];
+                _cache[item.PartitionKey] = new Dictionary<string, T>();
+                exchange = _cache[item.PartitionKey];
             }
 
-            exchange[item.GetRowKey] = (T)item.Clone();
+            exchange[item.RowKey] = (T)item.Clone();
         }
 
         public void Set(T item)
