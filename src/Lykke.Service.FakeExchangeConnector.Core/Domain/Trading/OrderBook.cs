@@ -32,7 +32,7 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Domain.Trading
         public IReadOnlyCollection<VolumePrice> Bids { get; }
 
         [JsonIgnore]
-        public string GetKey => $"{Source}_{AssetPairId}";
+        public string Key => $"{Source}_{AssetPairId}";
 
         public object Clone()
         {

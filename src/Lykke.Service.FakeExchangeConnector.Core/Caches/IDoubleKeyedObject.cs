@@ -2,7 +2,7 @@
 {
     public interface IDoubleKeyedObject
     {
-        string GetPartitionKey { get; }
-        string GetRowKey { get; }
+        string PartitionKey { get; }
+        string RowKey { get; }
     }
 }

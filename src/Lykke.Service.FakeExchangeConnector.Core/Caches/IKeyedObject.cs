@@ -2,6 +2,6 @@
 {
     public interface IKeyedObject
     {
-        string GetKey { get; }
+        string Key { get; }
     }
 }
