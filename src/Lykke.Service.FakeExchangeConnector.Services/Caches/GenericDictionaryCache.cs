@@ -47,7 +47,7 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Caches
             
             lock (LockObj)
             {
-                _cache[item.GetKey] = (T)item.Clone();
+                _cache[item.Key] = (T)item.Clone();
             }
         }
 
@@ -58,7 +58,7 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Caches
             
             lock (LockObj)
             {
-                items.Where(x => x != null).ForEach(x => _cache[x.GetKey] = (T)x.Clone());
+                items.Where(x => x != null).ForEach(x => _cache[x.Key] = (T)x.Clone());
             }
         }
 

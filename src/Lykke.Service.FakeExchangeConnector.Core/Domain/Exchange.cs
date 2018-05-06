@@ -24,7 +24,7 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Domain
         public bool PushEventToRabbit { get; set; }
 
         [JsonIgnore]
-        public string GetKey => Name;
+        public string Key => Name;
 
         public Exchange(string name)
         {
