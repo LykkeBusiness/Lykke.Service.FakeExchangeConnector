@@ -4,6 +4,7 @@ using Common.Log;
 using Lykke.RabbitMqBroker.Publisher;
 using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.Service.FakeExchangeConnector.Core;
+using Lykke.Service.FakeExchangeConnector.Core.Domain;
 using Lykke.Service.FakeExchangeConnector.Core.Rabbit;
 
 namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
@@ -14,7 +15,8 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
         private readonly RabbitMqBroker.Publisher.RabbitMqPublisher<T> _rabbitPublisher;
         private readonly object _sync = new object();
 
-        public RabbitMqPublisher(string connectionString, string exchangeName, bool enabled, ILog log, bool durable = true)
+        public RabbitMqPublisher(string connectionString, string exchangeName, bool enabled, ILog log, 
+            bool durable = true, string messageFormat = null)
         {
             _enabled = enabled;
             if (!enabled)
@@ -29,9 +31,13 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
                 IsDurable = durable
             };
 
+            var serializer = GetSerializer(Enum.TryParse<RabbitMessageFormat>(messageFormat, out var format)
+                ? format
+                : default); 
+
             _rabbitPublisher = new RabbitMqBroker.Publisher.RabbitMqPublisher<T>(publisherSettings)
                 .DisableInMemoryQueuePersistence()
-                .SetSerializer(new JsonMessageSerializer<T>())
+                .SetSerializer(serializer)
                 .SetLogger(log)
                 .SetPublishStrategy(new DefaultFanoutPublishStrategy(publisherSettings))
                 .SetConsole(new LogToConsole())
@@ -55,6 +61,19 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
         {
             _rabbitPublisher?.Stop();
             _rabbitPublisher?.Dispose();
+        }
+
+        private IRabbitMqSerializer<T> GetSerializer(RabbitMessageFormat format)
+        {
+            switch (format)
+            {
+                case RabbitMessageFormat.Json:
+                    return new JsonMessageSerializer<T>();
+                case RabbitMessageFormat.MessagePack:
+                    return new MessagePackMessageSerializer<T>();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, null);
+            }
         }
     }
 }
