@@ -196,14 +196,19 @@ namespace Lykke.Service.FakeExchangeConnector
                 AzureTableStorage<LogEntity>.Create(dbLogConnectionStringManager, "FakeExchangeConnectorLog", consoleLogger),
                 consoleLogger);
 
-            // Creating slack notification service, which logs own azure queue processing messages to aggregate log
-            var slackService = services.UseSlackNotificationsSenderViaAzureQueue(new AzureQueueIntegration.AzureQueueSettings
+            LykkeLogToAzureSlackNotificationsManager slackNotificationsManager = null;
+            if (settings.CurrentValue.SlackNotifications != null)
             {
-                ConnectionString = settings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
-                QueueName = settings.CurrentValue.SlackNotifications.AzureQueue.QueueName
-            }, aggregateLogger);
+                // Creating slack notification service, which logs own azure queue processing messages to aggregate log
+                var slackService = services.UseSlackNotificationsSenderViaAzureQueue(
+                    new AzureQueueIntegration.AzureQueueSettings
+                    {
+                        ConnectionString = settings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
+                        QueueName = settings.CurrentValue.SlackNotifications.AzureQueue.QueueName
+                    }, aggregateLogger);
 
-            var slackNotificationsManager = new LykkeLogToAzureSlackNotificationsManager(slackService, consoleLogger);
+                slackNotificationsManager = new LykkeLogToAzureSlackNotificationsManager(slackService, consoleLogger);
+            }
 
             // Creating azure storage logger, which logs own messages to concole log
             var azureStorageLogger = new LykkeLogToAzureStorage(
