@@ -62,11 +62,10 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Domain.Trading
             Volume = Math.Abs(volume);
         }
 
-        [JsonProperty("price"), Key(0)]
-        public decimal Price { get; set; }
-
-        [JsonProperty("volume"), Key(1)]
+        [JsonProperty("volume"), Key(0)]
         public decimal Volume { get; set; }
-
+        
+        [JsonProperty("price"), Key(1)]
+        public decimal Price { get; set; }
     }
 }
