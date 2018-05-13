@@ -45,7 +45,7 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
                 .ToList();
         }
 
-        private IReadOnlyList<VolumePrice> ShakePrices(IEnumerable<VolumePrice> book, decimal delta)
+        private List<VolumePrice> ShakePrices(IEnumerable<VolumePrice> book, decimal delta)
         {
             return book.Select(x =>
                     new VolumePrice(Math.Round(x.Price *

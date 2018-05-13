@@ -1,13 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lykke.Service.FakeExchangeConnector.Core.Caches;
+using MessagePack;
 using Newtonsoft.Json;
 
 namespace Lykke.Service.FakeExchangeConnector.Core.Domain.Trading
 {
+    [MessagePackObject]
     public sealed class OrderBook : IKeyedObject, ICloneable
     {
-        public OrderBook(string source, string assetPairId, IReadOnlyCollection<VolumePrice> asks, IReadOnlyCollection<VolumePrice> bids, DateTime timestamp)
+        public OrderBook()
+        {
+            
+        }
+        
+        public OrderBook(string source, string assetPairId, List<VolumePrice> asks, List<VolumePrice> bids, DateTime timestamp)
         {
             Source = source;
             AssetPairId = assetPairId;
@@ -16,22 +24,22 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Domain.Trading
             Timestamp = timestamp;
         }
 
-        [JsonProperty("source")]
-        public string Source { get; }
+        [JsonProperty("source"), Key(0)]
+        public string Source { get; set; }
 
-        [JsonProperty("asset")]
-        public string AssetPairId { get; }
+        [JsonProperty("asset"), Key(1)]
+        public string AssetPairId { get; set; }
 
-        [JsonProperty("timestamp")]
-        public DateTime Timestamp { get; }
+        [JsonProperty("timestamp"), Key(2)]
+        public DateTime Timestamp { get; set; }
 
-        [JsonProperty("asks")]
-        public IReadOnlyCollection<VolumePrice> Asks { get; }
+        [JsonProperty("asks"), Key(3)]
+        public List<VolumePrice> Asks { get; set; }
 
-        [JsonProperty("bids")]
-        public IReadOnlyCollection<VolumePrice> Bids { get; }
+        [JsonProperty("bids"), Key(4)]
+        public List<VolumePrice> Bids { get; set; }
 
-        [JsonIgnore]
+        [JsonIgnore, IgnoreMember]
         public string Key => $"{Source}_{AssetPairId}";
 
         public object Clone()
@@ -40,19 +48,25 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Domain.Trading
         }
     }
 
+    [MessagePackObject]
     public sealed class VolumePrice
     {
+        public VolumePrice()
+        {
+            
+        }
+        
         public VolumePrice(decimal price, decimal volume)
         {
             Price =  price;
             Volume = Math.Abs(volume);
         }
 
-        [JsonProperty("price")]
-        public decimal Price { get; }
+        [JsonProperty("price"), Key(0)]
+        public decimal Price { get; set; }
 
-        [JsonProperty("volume")]
-        public decimal Volume { get; }
+        [JsonProperty("volume"), Key(1)]
+        public decimal Volume { get; set; }
 
     }
 }
