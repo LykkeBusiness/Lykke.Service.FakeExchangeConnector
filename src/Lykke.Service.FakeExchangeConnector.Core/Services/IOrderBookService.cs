@@ -5,5 +5,7 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Services
     public interface IOrderBookService
     {
         Task PostFakeOrderBooks();
+
+        void RemoveOrderBooksByAssetPair(string assetPairId);
     }
 }
