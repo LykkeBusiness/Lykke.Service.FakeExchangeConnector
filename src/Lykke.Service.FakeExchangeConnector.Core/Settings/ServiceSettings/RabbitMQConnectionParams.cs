@@ -1,4 +1,5 @@
-﻿using Lykke.SettingsReader.Attributes;
+﻿using JetBrains.Annotations;
+using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.Service.FakeExchangeConnector.Core.Settings.ServiceSettings
 {
@@ -18,5 +19,8 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Settings.ServiceSettings
 
         [Optional]
         public string RoutingKey => null;
+        
+        [Optional, CanBeNull]
+        public string MessageFormat { get; set; }
     }
 }

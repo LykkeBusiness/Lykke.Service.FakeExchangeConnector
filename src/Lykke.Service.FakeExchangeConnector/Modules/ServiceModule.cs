@@ -18,14 +18,14 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
 {
     public class ServiceModule : Module
     {
-        private readonly IReloadingManager<FakeExchangeConnectorSettings> _settings;
+        private readonly FakeExchangeConnectorSettings _settings;
         private readonly ILog _log;
         // NOTE: you can remove it if you don't need to use IServiceCollection extensions to register service specific dependencies
         private readonly IServiceCollection _services;
 
         public ServiceModule(IReloadingManager<FakeExchangeConnectorSettings> settings, ILog log)
         {
-            _settings = settings;
+            _settings = settings.CurrentValue;
             _log = log;
 
             _services = new ServiceCollection();
@@ -39,7 +39,7 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
             //      .As<IQuotesPublisher>()
             //      .WithParameter(TypedParameter.From(_settings.CurrentValue.QuotesPublication))
 
-            builder.RegisterInstance(_settings.CurrentValue)
+            builder.RegisterInstance(_settings)
                 .AsSelf()
                 .SingleInstance();
             
@@ -95,7 +95,7 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
         private void RegisterPeriodicalHandlers(ContainerBuilder builder)
         {
             builder.RegisterType<FakeOrderBookHandler>()
-                .WithParameter(TypedParameter.From(_settings.CurrentValue.FakeOrderBookPublishingPeriodMilliseconds))
+                .WithParameter(TypedParameter.From(_settings.FakeOrderBookPublishingPeriodMilliseconds))
                 .SingleInstance();
         }
         
@@ -106,11 +106,12 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance()
                 .WithParameters(new[]
                 {
-                    new NamedParameter("connectionString", _settings.CurrentValue.Rabbit.ExchangeConnectorQuotes.ConnectionString),
-                    new NamedParameter("exchangeName", _settings.CurrentValue.Rabbit.ExchangeConnectorQuotes.ExchangeName),
-                    new NamedParameter("queueName", _settings.CurrentValue.Rabbit.ExchangeConnectorQuotes.QueueName),
+                    new NamedParameter("connectionString", _settings.Rabbit.ExchangeConnectorQuotes.ConnectionString),
+                    new NamedParameter("exchangeName", _settings.Rabbit.ExchangeConnectorQuotes.ExchangeName),
+                    new NamedParameter("queueName", _settings.Rabbit.ExchangeConnectorQuotes.QueueName),
                     new NamedParameter("isDurable", false),
-                    new NamedParameter("log", _log)
+                    new NamedParameter("log", _log),
+                    new NamedParameter("messageFormat", _settings.Rabbit.ExchangeConnectorQuotes.MessageFormat), 
                 });
         }
 
@@ -121,10 +122,11 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance()
                 .WithParameters(new[]
                 {
-                    new NamedParameter("connectionString", _settings.CurrentValue.Rabbit.ExchangeConnectorOrder.ConnectionString),
-                    new NamedParameter("exchangeName", _settings.CurrentValue.Rabbit.ExchangeConnectorOrder.ExchangeName),
+                    new NamedParameter("connectionString", _settings.Rabbit.ExchangeConnectorOrder.ConnectionString),
+                    new NamedParameter("exchangeName", _settings.Rabbit.ExchangeConnectorOrder.ExchangeName),
                     new NamedParameter("enabled", true),
-                    new NamedParameter("log", _log)
+                    new NamedParameter("log", _log),
+                    new NamedParameter("messageFormat", _settings.Rabbit.ExchangeConnectorOrder.MessageFormat), 
                 });
             
             builder.RegisterType<FakeOrderBookFakePublisher>()
@@ -132,10 +134,11 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance()
                 .WithParameters(new[]
                 {
-                    new NamedParameter("connectionString", _settings.CurrentValue.Rabbit.FakeOrderBook.ConnectionString),
-                    new NamedParameter("exchangeName", _settings.CurrentValue.Rabbit.FakeOrderBook.ExchangeName),
+                    new NamedParameter("connectionString", _settings.Rabbit.FakeOrderBook.ConnectionString),
+                    new NamedParameter("exchangeName", _settings.Rabbit.FakeOrderBook.ExchangeName),
                     new NamedParameter("enabled", true),
-                    new NamedParameter("log", _log)
+                    new NamedParameter("log", _log),
+                    new NamedParameter("messageFormat", _settings.Rabbit.FakeOrderBook.MessageFormat), 
                 });
         }
     }

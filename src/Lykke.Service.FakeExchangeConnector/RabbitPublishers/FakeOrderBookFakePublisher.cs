@@ -10,8 +10,9 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
             string exchangeName, 
             bool enabled, 
             ILog log,
-            bool durable = false) 
-            : base(connectionString, exchangeName, enabled, log, durable)
+            bool durable = false,
+            string messageFormat = null) 
+            : base(connectionString, exchangeName, enabled, log, durable, messageFormat)
         {
             
         }
