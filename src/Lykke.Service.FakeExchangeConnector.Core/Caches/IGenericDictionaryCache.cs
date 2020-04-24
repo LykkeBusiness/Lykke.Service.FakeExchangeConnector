@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Lykke.Service.FakeExchangeConnector.Core.Caches
 {
@@ -13,6 +14,8 @@ namespace Lykke.Service.FakeExchangeConnector.Core.Caches
         void SetAll(IEnumerable<T> items);
 
         void Clear(string key);
+
+        void ClearByCondition(Func<T, bool> removalPredicate);
 
         void ClearAll();
 

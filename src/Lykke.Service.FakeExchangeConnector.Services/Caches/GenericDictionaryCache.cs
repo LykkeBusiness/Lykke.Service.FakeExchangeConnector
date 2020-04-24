@@ -70,6 +70,26 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Caches
             }
         }
 
+        public void ClearByCondition(Func<T, bool> removalPredicate)
+        {
+            if (removalPredicate == null) return;
+            
+            var removals = new List<string>();
+                
+            lock (LockObj)
+            {
+                _cache.ForEach(pair =>
+                {
+                    if (removalPredicate(pair.Value))
+                    {
+                        removals.Add(pair.Key);
+                    }
+                });
+                
+                removals.ForEach(key => _cache.Remove(key));
+            }
+        }
+
         public void ClearAll()
         {
             lock (LockObj)

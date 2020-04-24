@@ -36,6 +36,14 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
             await Task.WhenAll(orderbooks.Select(_fakeOrderBookPublisher.Publish));
         }
 
+        public void RemoveOrderBooksByAssetPair(string assetPairId)
+        {
+            if (string.IsNullOrWhiteSpace(assetPairId))
+                throw new ArgumentNullException(nameof(assetPairId));
+            
+            _orderBookCache.ClearByCondition(o => o.AssetPairId == assetPairId);
+        }
+
         private IEnumerable<OrderBook> ShakeBooks(IEnumerable<OrderBook> orderBooks)
         {
             var random = new Random();
