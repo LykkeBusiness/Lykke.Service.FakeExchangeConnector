@@ -12,7 +12,9 @@ using Lykke.Service.FakeExchangeConnector.Services;
 using Lykke.Service.FakeExchangeConnector.Services.Caches;
 using Lykke.Service.FakeExchangeConnector.Services.Services;
 using Lykke.SettingsReader;
+using Lykke.Snow.Common.Correlation.RabbitMq;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.FakeExchangeConnector.Modules
 {
@@ -22,11 +24,19 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
         private readonly ILog _log;
         // NOTE: you can remove it if you don't need to use IServiceCollection extensions to register service specific dependencies
         private readonly IServiceCollection _services;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly RabbitMqCorrelationManager _correlationManager;
 
-        public ServiceModule(IReloadingManager<FakeExchangeConnectorSettings> settings, ILog log)
+        public ServiceModule(
+            IReloadingManager<FakeExchangeConnectorSettings> settings,
+            ILog log,
+            ILoggerFactory loggerFactory,
+            RabbitMqCorrelationManager correlationManager)
         {
             _settings = settings.CurrentValue;
             _log = log;
+            _loggerFactory = loggerFactory;
+            _correlationManager = correlationManager;
 
             _services = new ServiceCollection();
         }
@@ -106,6 +116,8 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance()
                 .WithParameters(new[]
                 {
+                    new NamedParameter("correlationManager", _correlationManager),
+                    new NamedParameter("loggerFactory", _loggerFactory),
                     new NamedParameter("connectionString", _settings.Rabbit.ExchangeConnectorQuotes.ConnectionString),
                     new NamedParameter("exchangeName", _settings.Rabbit.ExchangeConnectorQuotes.ExchangeName),
                     new NamedParameter("queueName", _settings.Rabbit.ExchangeConnectorQuotes.QueueName),
@@ -122,6 +134,8 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance()
                 .WithParameters(new[]
                 {
+                    new NamedParameter("correlationManager", _correlationManager),
+                    new NamedParameter("loggerFactory", _loggerFactory),
                     new NamedParameter("connectionString", _settings.Rabbit.ExchangeConnectorOrder.ConnectionString),
                     new NamedParameter("exchangeName", _settings.Rabbit.ExchangeConnectorOrder.ExchangeName),
                     new NamedParameter("enabled", true),
@@ -134,6 +148,8 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance()
                 .WithParameters(new[]
                 {
+                    new NamedParameter("correlationManager", _correlationManager),
+                    new NamedParameter("loggerFactory", _loggerFactory),
                     new NamedParameter("connectionString", _settings.Rabbit.FakeOrderBook.ConnectionString),
                     new NamedParameter("exchangeName", _settings.Rabbit.FakeOrderBook.ExchangeName),
                     new NamedParameter("enabled", true),

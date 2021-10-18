@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Common.Log;
+using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Publisher;
+using Lykke.RabbitMqBroker.Publisher.Serializers;
+using Lykke.RabbitMqBroker.Publisher.Strategies;
 using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.Service.FakeExchangeConnector.Core;
 using Lykke.Service.FakeExchangeConnector.Core.Domain;
 using Lykke.Service.FakeExchangeConnector.Core.Rabbit;
+using Lykke.Snow.Common.Correlation.RabbitMq;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
 {
@@ -15,8 +20,15 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
         private readonly RabbitMqBroker.Publisher.RabbitMqPublisher<T> _rabbitPublisher;
         private readonly object _sync = new object();
 
-        public RabbitMqPublisher(string connectionString, string exchangeName, bool enabled, ILog log, 
-            bool durable = true, string messageFormat = null)
+        public RabbitMqPublisher(
+            RabbitMqCorrelationManager correlationManager,
+            ILoggerFactory loggerFactory,
+            string connectionString,
+            string exchangeName,
+            bool enabled,
+            ILog log, 
+            bool durable = true, 
+            string messageFormat = null)
         {
             _enabled = enabled;
             if (!enabled)
@@ -35,14 +47,13 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
                 ? format
                 : default); 
 
-            _rabbitPublisher = new RabbitMqBroker.Publisher.RabbitMqPublisher<T>(publisherSettings)
+            _rabbitPublisher = new RabbitMqBroker.Publisher.RabbitMqPublisher<T>(loggerFactory, publisherSettings)
                 .DisableInMemoryQueuePersistence()
                 .SetSerializer(serializer)
-                .SetLogger(log)
+                .SetWriteHeadersFunc(correlationManager.BuildCorrelationHeadersIfExists)
                 .SetPublishStrategy(new DefaultFanoutPublishStrategy(publisherSettings))
-                .SetConsole(new LogToConsole())
-                .PublishSynchronously()
-                .Start();
+                .PublishSynchronously();
+            _rabbitPublisher.Start();
         }
 
         public Task Publish(T message)

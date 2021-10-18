@@ -14,10 +14,13 @@ using Lykke.Service.FakeExchangeConnector.PeriodicalHandlers;
 using Lykke.Service.FakeExchangeConnector.RabbitSubscribers;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
+using Lykke.Snow.Common.Correlation;
+using Lykke.Snow.Common.Correlation.RabbitMq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.FakeExchangeConnector
 {
@@ -54,12 +57,20 @@ namespace Lykke.Service.FakeExchangeConnector
                     options.DefaultLykkeConfiguration("v1", "FakeExchangeConnector API");
                 });
 
+                services.AddCorrelation();
+
                 var builder = new ContainerBuilder();
                 var appSettings = Configuration.LoadSettings<AppSettings>();
 
                 Log = CreateLogWithSlack(services, appSettings);
 
-                builder.RegisterModule(new ServiceModule(appSettings.Nested(x => x.FakeExchangeConnectorService), Log));
+                var provider = services.BuildServiceProvider();
+                builder.RegisterModule(
+                    new ServiceModule(
+                        appSettings.Nested(x => x.FakeExchangeConnectorService), 
+                        Log,
+                        provider.GetRequiredService<ILoggerFactory>(),
+                        provider.GetRequiredService<RabbitMqCorrelationManager>()));
                 builder.Populate(services);
                 ApplicationContainer = builder.Build();
 
@@ -83,7 +94,8 @@ namespace Lykke.Service.FakeExchangeConnector
 
                 app.UseLykkeForwardedHeaders();
                 app.UseLykkeMiddleware("FakeExchangeConnector", ex => new { Message = "Technical problem" });
-
+                app.UseCorrelation();
+                
                 app.UseMvc();
                 app.UseSwagger(c =>
                 {

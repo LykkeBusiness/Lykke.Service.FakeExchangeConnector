@@ -2,10 +2,13 @@
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.RabbitMqBroker;
-using Lykke.RabbitMqBroker.Subscriber;
-using Lykke.Service.FakeExchangeConnector.Core;
+using Lykke.RabbitMqBroker.Subscriber.Deserializers;
+using Lykke.RabbitMqBroker.Subscriber.MessageReadStrategies;
+using Lykke.RabbitMqBroker.Subscriber.Middleware.ErrorHandling;
 using Lykke.Service.FakeExchangeConnector.Core.Domain;
 using Lykke.Service.FakeExchangeConnector.Core.Rabbit;
+using Lykke.Snow.Common.Correlation.RabbitMq;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.FakeExchangeConnector.RabbitSubscribers
 {
@@ -15,20 +18,31 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitSubscribers
         
         private RabbitMqBroker.Subscriber.RabbitMqSubscriber<T> _subscriber;
         private readonly IMessageDeserializer<T> _messageDeserializer;
+        private readonly RabbitMqCorrelationManager _correlationManager;
+        private readonly ILoggerFactory _loggerFactory;
         
         private readonly string _connectionString;
         private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly bool _isDurable;
 
-        public RabbitMqSubscriber(ILog log, string connectionString, string exchangeName, string queueName, 
-            bool isDurable, string messageFormat)
+        public RabbitMqSubscriber(
+            RabbitMqCorrelationManager correlationManager,
+            ILoggerFactory loggerFactory,
+            ILog log,
+            string connectionString,
+            string exchangeName,
+            string queueName, 
+            bool isDurable,
+            string messageFormat)
         {
             _log = log;
             _connectionString = connectionString;
             _exchangeName = exchangeName;
             _queueName = queueName;
             _isDurable = isDurable;
+            _correlationManager = correlationManager;
+            _loggerFactory = loggerFactory;
 
             _messageDeserializer = GetDeserializer(Enum.TryParse<RabbitMessageFormat>(messageFormat, out var format)
                 ? format
@@ -45,15 +59,19 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitSubscribers
                 IsDurable = _isDurable,
             };
 
-            _subscriber = new RabbitMqBroker.Subscriber.RabbitMqSubscriber<T>(settings,
-                    new ResilientErrorHandlingStrategy(_log, settings,
-                        retryTimeout: TimeSpan.FromSeconds(10),
-                        next: new DeadQueueErrorHandlingStrategy(_log, settings)))
+            _subscriber = new RabbitMqBroker.Subscriber.RabbitMqSubscriber<T>(
+                    _loggerFactory.CreateLogger<RabbitMqBroker.Subscriber.RabbitMqSubscriber<T>>(),
+                    settings)
                 .SetMessageDeserializer(_messageDeserializer)
                 .SetMessageReadStrategy(new MessageReadQueueStrategy())
                 .Subscribe(handleMessage)
                 .CreateDefaultBinding()
-                .SetLogger(_log)
+                .UseMiddleware(new ResilientErrorHandlingMiddleware<T>(
+                    _loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<T>>(),
+                    TimeSpan.FromSeconds(10)))
+                .UseMiddleware(new ExceptionSwallowMiddleware<T>(
+                    _loggerFactory.CreateLogger<ExceptionSwallowMiddleware<T>>()))
+                .SetReadHeadersAction(_correlationManager.FetchCorrelationIfExists)
                 .Start();
         }
 
