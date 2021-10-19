@@ -15,12 +15,10 @@ using Lykke.Service.FakeExchangeConnector.RabbitSubscribers;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.Snow.Common.Correlation;
-using Lykke.Snow.Common.Correlation.RabbitMq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.FakeExchangeConnector
 {
@@ -64,13 +62,10 @@ namespace Lykke.Service.FakeExchangeConnector
 
                 Log = CreateLogWithSlack(services, appSettings);
 
-                var provider = services.BuildServiceProvider();
                 builder.RegisterModule(
                     new ServiceModule(
                         appSettings.Nested(x => x.FakeExchangeConnectorService), 
-                        Log,
-                        provider.GetRequiredService<ILoggerFactory>(),
-                        provider.GetRequiredService<RabbitMqCorrelationManager>()));
+                        Log));
                 builder.Populate(services);
                 ApplicationContainer = builder.Build();
 
