@@ -8,7 +8,7 @@ RUN apk add --no-cache icu-libs \
  || echo "No specific certificate given."
 RUN cp [nN]u[gG]et.[cC]onfig /usr/local/share/NuGet.Config 2>/dev/null \
  || echo "No specific Nuget configuration given."
-WORKDIR /src/FakeExchangeConnector
+WORKDIR /src/Lykke.Service.FakeExchangeConnector
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 RUN dotnet publish -c Release -o /app
 
