@@ -3,6 +3,7 @@ using Common.Log;
 using Lykke.Service.FakeExchangeConnector.Core.Caches;
 using Lykke.Service.FakeExchangeConnector.Core.Domain.Trading;
 using Lykke.Service.FakeExchangeConnector.Core.Services;
+using Lykke.Snow.Common.Correlation;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -13,12 +14,14 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
         private readonly IOrderBookCache _orderBookCache;
         private readonly IOrderBookService _orderBookService;
         private readonly ILog _log;
+        private readonly CorrelationContextAccessor _correlationContextAccessor;
 
-        public OrderbooksController(IOrderBookCache orderBookCache, IOrderBookService orderBookService, ILog log)
+        public OrderbooksController(IOrderBookCache orderBookCache, IOrderBookService orderBookService, ILog log, CorrelationContextAccessor correlationContextAccessor)
         {
             _orderBookCache = orderBookCache;
             _orderBookService = orderBookService;
             _log = log;
+            _correlationContextAccessor = correlationContextAccessor;
         }
         
         /// <summary>
@@ -41,6 +44,9 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
         [ProducesResponseType(200)]
         public IActionResult Post([FromBody] OrderBook[] orderbooks)
         {
+            var correlationId = $"orderbooks-post";
+            _correlationContextAccessor.CorrelationContext = new CorrelationContext(correlationId);
+            _log.WriteMonitor( nameof(Post),nameof(OrderbooksController),$"Correlation context with id '{correlationId}' was created.");
             if (orderbooks == null || orderbooks.Length == 0)
                 return BadRequest();
 
