@@ -14,14 +14,12 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
         private readonly IOrderBookCache _orderBookCache;
         private readonly IOrderBookService _orderBookService;
         private readonly ILog _log;
-        private readonly CorrelationContextAccessor _correlationContextAccessor;
 
-        public OrderbooksController(IOrderBookCache orderBookCache, IOrderBookService orderBookService, ILog log, CorrelationContextAccessor correlationContextAccessor)
+        public OrderbooksController(IOrderBookCache orderBookCache, IOrderBookService orderBookService, ILog log)
         {
             _orderBookCache = orderBookCache;
             _orderBookService = orderBookService;
             _log = log;
-            _correlationContextAccessor = correlationContextAccessor;
         }
         
         /// <summary>
@@ -44,9 +42,6 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
         [ProducesResponseType(200)]
         public IActionResult Post([FromBody] OrderBook[] orderbooks)
         {
-            var correlationId = $"orderbooks-post";
-            _correlationContextAccessor.CorrelationContext = new CorrelationContext(correlationId);
-            _log.WriteMonitor( nameof(Post),nameof(OrderbooksController),$"Correlation context with id '{correlationId}' was created.");
             if (orderbooks == null || orderbooks.Length == 0)
                 return BadRequest();
 
