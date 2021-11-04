@@ -66,11 +66,11 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitSubscribers
                 .SetMessageReadStrategy(new MessageReadQueueStrategy())
                 .Subscribe(handleMessage)
                 .CreateDefaultBinding()
+                .UseMiddleware(new ExceptionSwallowMiddleware<T>(
+                    _loggerFactory.CreateLogger<ExceptionSwallowMiddleware<T>>()))
                 .UseMiddleware(new ResilientErrorHandlingMiddleware<T>(
                     _loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<T>>(),
                     TimeSpan.FromSeconds(10)))
-                .UseMiddleware(new ExceptionSwallowMiddleware<T>(
-                    _loggerFactory.CreateLogger<ExceptionSwallowMiddleware<T>>()))
                 .SetReadHeadersAction(_correlationManager.FetchCorrelationIfExists)
                 .Start();
         }
