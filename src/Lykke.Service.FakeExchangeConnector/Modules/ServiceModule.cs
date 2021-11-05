@@ -12,7 +12,9 @@ using Lykke.Service.FakeExchangeConnector.Services;
 using Lykke.Service.FakeExchangeConnector.Services.Caches;
 using Lykke.Service.FakeExchangeConnector.Services.Services;
 using Lykke.SettingsReader;
+using Lykke.Snow.Common.Correlation.RabbitMq;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.FakeExchangeConnector.Modules
 {
@@ -23,7 +25,9 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
         // NOTE: you can remove it if you don't need to use IServiceCollection extensions to register service specific dependencies
         private readonly IServiceCollection _services;
 
-        public ServiceModule(IReloadingManager<FakeExchangeConnectorSettings> settings, ILog log)
+        public ServiceModule(
+            IReloadingManager<FakeExchangeConnectorSettings> settings,
+            ILog log)
         {
             _settings = settings.CurrentValue;
             _log = log;
@@ -104,6 +108,10 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
             builder.RegisterType<OrderBookSubscriber>()
                 .AsSelf()
                 .SingleInstance()
+                .WithParameter((pi, c) => pi.Name == "correlationManager",
+                    (pi, c) => c.Resolve<RabbitMqCorrelationManager>())
+                .WithParameter((pi, c) => pi.Name == "loggerFactory",
+                    (pi, c) => c.Resolve<ILoggerFactory>())
                 .WithParameters(new[]
                 {
                     new NamedParameter("connectionString", _settings.Rabbit.ExchangeConnectorQuotes.ConnectionString),
@@ -120,6 +128,10 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
             builder.RegisterType<ExecutionReportPublisher>()
                 .As<IExecutionReportPublisher>()
                 .SingleInstance()
+                .WithParameter((pi, c) => pi.Name == "correlationManager",
+                    (pi, c) => c.Resolve<RabbitMqCorrelationManager>())
+                .WithParameter((pi, c) => pi.Name == "loggerFactory",
+                    (pi, c) => c.Resolve<ILoggerFactory>())
                 .WithParameters(new[]
                 {
                     new NamedParameter("connectionString", _settings.Rabbit.ExchangeConnectorOrder.ConnectionString),
@@ -132,6 +144,10 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
             builder.RegisterType<FakeOrderBookFakePublisher>()
                 .As<IFakeOrderBookPublisher>()
                 .SingleInstance()
+                .WithParameter((pi, c) => pi.Name == "correlationManager",
+                    (pi, c) => c.Resolve<RabbitMqCorrelationManager>())
+                .WithParameter((pi, c) => pi.Name == "loggerFactory",
+                    (pi, c) => c.Resolve<ILoggerFactory>())
                 .WithParameters(new[]
                 {
                     new NamedParameter("connectionString", _settings.Rabbit.FakeOrderBook.ConnectionString),

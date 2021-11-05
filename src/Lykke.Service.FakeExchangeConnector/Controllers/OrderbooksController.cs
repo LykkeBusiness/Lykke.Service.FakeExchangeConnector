@@ -3,6 +3,7 @@ using Common.Log;
 using Lykke.Service.FakeExchangeConnector.Core.Caches;
 using Lykke.Service.FakeExchangeConnector.Core.Domain.Trading;
 using Lykke.Service.FakeExchangeConnector.Core.Services;
+using Lykke.Snow.Common.Correlation;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 

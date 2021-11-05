@@ -1,4 +1,4 @@
-FROM microsoft/aspnetcore:2.0
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
 RUN apk add --no-cache tzdata
 WORKDIR /app
 COPY . .
