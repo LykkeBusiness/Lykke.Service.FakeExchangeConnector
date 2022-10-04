@@ -3,7 +3,7 @@ using System.Net;
 using Lykke.Service.FakeExchangeConnector.Core.Services;
 using Lykke.Service.FakeExchangeConnector.Models;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Lykke.Service.FakeExchangeConnector.Controllers
 {
