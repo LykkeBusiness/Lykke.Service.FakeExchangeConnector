@@ -90,7 +90,7 @@ namespace Lykke.Service.FakeExchangeConnector
                 }
 
                 app.UseLykkeForwardedHeaders();
-                app.UseLykkeMiddleware("FakeExchangeConnector", ex => new { Message = "Technical problem" });
+                app.UseLykkeMiddleware("FakeExchangeConnector", ex => new { Message = "Technical problem" }, false);
                 app.UseCorrelation();
                 
                 app.UseMvc();
