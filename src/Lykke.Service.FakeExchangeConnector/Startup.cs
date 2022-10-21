@@ -55,7 +55,7 @@ namespace Lykke.Service.FakeExchangeConnector
                 services.AddSwaggerGen(options =>
                 {
                     options.DefaultLykkeConfiguration("v1", "FakeExchangeConnector API");
-                });
+                }).AddSwaggerGenNewtonsoftSupport();
 
                 services.AddCorrelation();
 
