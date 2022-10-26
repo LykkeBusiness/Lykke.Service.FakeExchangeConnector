@@ -1,8 +1,7 @@
-﻿using Lykke.Service.FakeExchangeConnector.Core.Domain;
-using Lykke.Service.FakeExchangeConnector.Core.Services;
+﻿using Lykke.Service.FakeExchangeConnector.Core.Services;
 using Lykke.Service.FakeExchangeConnector.Core.Settings.ServiceSettings;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Lykke.Service.FakeExchangeConnector.Controllers
 {

@@ -1,5 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
-RUN apk add --no-cache tzdata
+FROM mcr.microsoft.com/dotnet/sdk:6.0
 WORKDIR /app
 COPY . .
 ENTRYPOINT ["dotnet", "Lykke.Service.FakeExchangeConnector.dll"]

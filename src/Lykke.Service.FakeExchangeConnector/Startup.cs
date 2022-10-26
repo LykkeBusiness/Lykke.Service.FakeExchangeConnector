@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -19,6 +20,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 
 namespace Lykke.Service.FakeExchangeConnector
 {
@@ -43,8 +45,8 @@ namespace Lykke.Service.FakeExchangeConnector
         {
             try
             {
-                services.AddMvc()
-                    .AddJsonOptions(options =>
+                services.AddControllers(o => o.EnableEndpointRouting = false)
+                    .AddNewtonsoftJson(options =>
                     {
                         options.SerializerSettings.ContractResolver =
                             new Newtonsoft.Json.Serialization.DefaultContractResolver();
@@ -53,7 +55,7 @@ namespace Lykke.Service.FakeExchangeConnector
                 services.AddSwaggerGen(options =>
                 {
                     options.DefaultLykkeConfiguration("v1", "FakeExchangeConnector API");
-                });
+                }).AddSwaggerGenNewtonsoftSupport();
 
                 services.AddCorrelation();
 
@@ -88,13 +90,16 @@ namespace Lykke.Service.FakeExchangeConnector
                 }
 
                 app.UseLykkeForwardedHeaders();
-                app.UseLykkeMiddleware("FakeExchangeConnector", ex => new { Message = "Technical problem" });
+                app.UseLykkeMiddleware("FakeExchangeConnector", ex => new { Message = "Technical problem" }, false);
                 app.UseCorrelation();
                 
                 app.UseMvc();
                 app.UseSwagger(c =>
                 {
-                    c.PreSerializeFilters.Add((swagger, httpReq) => swagger.Host = httpReq.Host.Value);
+                    c.PreSerializeFilters.Add((swagger, httpReq) =>
+                    {
+                        swagger.Servers = new List<OpenApiServer> { new OpenApiServer {Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" }};
+                    });
                 });
                 app.UseSwaggerUI(x =>
                 {

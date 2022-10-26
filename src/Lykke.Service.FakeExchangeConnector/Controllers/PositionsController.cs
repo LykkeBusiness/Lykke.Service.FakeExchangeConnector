@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Lykke.Service.FakeExchangeConnector.Core.Caches;
 using Lykke.Service.FakeExchangeConnector.Core.Domain;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Lykke.Service.FakeExchangeConnector.Controllers
 {
