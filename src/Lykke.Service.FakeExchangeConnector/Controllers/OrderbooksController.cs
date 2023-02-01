@@ -1,4 +1,5 @@
 ﻿using System;
+using Common;
 using Common.Log;
 using Lykke.Service.FakeExchangeConnector.Core.Caches;
 using Lykke.Service.FakeExchangeConnector.Core.Domain.Trading;
@@ -45,6 +46,9 @@ namespace Lykke.Service.FakeExchangeConnector.Controllers
                 return BadRequest();
 
             _orderBookCache.SetAll(orderbooks);
+
+            _log.WriteInfo(nameof(OrderbooksController) + ".Post", orderbooks.ToJson(),
+                "Orderbooks were manually added");
 
             return Ok();
         }
