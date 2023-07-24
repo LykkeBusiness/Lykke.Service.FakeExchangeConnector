@@ -27,7 +27,7 @@
     <PackageReference Include="Lykke.Logs" Version="7.4.0" />
     <PackageReference Include="Lykke.Service.Session" Version="1.0.33" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="2.0.5" />
-    <PackageReference Include="Lykke.Snow.Common" Version="1.52.0" />
+    <PackageReference Include="Lykke.Snow.Common" Version="3.0.0" />
     <PackageReference Include="LykkeBiz.Common.ApiLibrary" Version="4.2.4" />
     <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="9.2.6" />
     <PackageReference Include="LykkeBiz.SettingsReader" Version="6.0.4" />
