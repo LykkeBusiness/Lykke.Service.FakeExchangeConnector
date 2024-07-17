@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Lykke.Service.FakeExchangeConnector.Core.Domain;
-using Lykke.Service.FakeExchangeConnector.Core.Domain.Trading;
+﻿using Lykke.Service.FakeExchangeConnector.Core.Domain;
 
 namespace Lykke.Service.FakeExchangeConnector.Core.Services
 {

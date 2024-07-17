@@ -1,12 +1,7 @@
-﻿using System;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Log;
-using Lykke.RabbitMqBroker;
-using Lykke.RabbitMqBroker.Subscriber;
-using Lykke.RabbitMqBroker.Subscriber.Middleware.ErrorHandling;
 using Lykke.Service.FakeExchangeConnector.Core.Caches;
-using Lykke.Service.FakeExchangeConnector.Core.Domain.Trading;
 using Lykke.Service.FakeExchangeConnector.Core.Rabbit;
 using Lykke.Service.FakeExchangeConnector.Core.Services;
 using Lykke.Service.FakeExchangeConnector.Core.Settings.ServiceSettings;
@@ -91,42 +86,20 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .As<IQuoteService>()
                 .SingleInstance();
             
-          
-            builder.AddRabbitMqConnectionProvider();
-            builder.AddRabbitMqListener<OrderBook, OrderBookMessageHandler>(new RabbitMqSubscriptionSettings
-                {
-                    ConnectionString = _settings.Rabbit.ExchangeConnectorQuotes.ConnectionString,
-                    ExchangeName = _settings.Rabbit.ExchangeConnectorQuotes.ExchangeName,
-                    QueueName = _settings.Rabbit.ExchangeConnectorQuotes.QueueName,
-                    IsDurable = false
-                },ConfigureOrderBookSubscriber)
-                .AddOptions(RabbitMqListenerOptions<OrderBook>.MessagePack.LossAcceptable)
-                .AutoStart();
-            
             RegisterPeriodicalHandlers(builder);
             RegisterRabbitMqPublishers(builder);
 
             builder.Populate(_services);
         }
-        private static void ConfigureOrderBookSubscriber(RabbitMqSubscriber<OrderBook> subscriber,
-            IComponentContext сtx)
-        {
-            var loggerFactory = сtx.Resolve<ILoggerFactory>();
-            var correlationManager = сtx.Resolve<RabbitMqCorrelationManager>();
-         
-            subscriber.UseMiddleware(new ExceptionSwallowMiddleware<OrderBook>(loggerFactory.CreateLogger<ExceptionSwallowMiddleware<OrderBook>>()))
-                .UseMiddleware(new ResilientErrorHandlingMiddleware<OrderBook>( loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<OrderBook>>(),
-                    TimeSpan.FromSeconds(10)))
-                .SetReadHeadersAction(correlationManager.FetchCorrelationIfExists);
-            
-        }
+
         private void RegisterPeriodicalHandlers(ContainerBuilder builder)
         {
             builder.RegisterType<FakeOrderBookHandler>()
                 .WithParameter(TypedParameter.From(_settings.FakeOrderBookPublishingPeriodMilliseconds))
                 .SingleInstance();
         }
-
+        
+      
         private void RegisterRabbitMqPublishers(ContainerBuilder builder)
         {
             builder.RegisterType<ExecutionReportPublisher>()
