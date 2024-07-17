@@ -14,52 +14,12 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
     public class QuoteService : IQuoteService
     {
         private readonly IQuoteCache _quoteCache;
-
-        private readonly ILog _log;
-
-        public QuoteService(IQuoteCache quoteCache,
-            ILog log)
+        
+        public QuoteService(IQuoteCache quoteCache)
         {
             _quoteCache = quoteCache;
-            _log = log;
         }
-
-        public async Task HandleQuote(OrderBook orderBook)
-        {
-            var bestPriceQuote = ConvertToBestPriceQuote(orderBook);
-
-            if (string.IsNullOrEmpty(bestPriceQuote?.ExchangeName) 
-                || string.IsNullOrEmpty(bestPriceQuote.Instrument)
-                || bestPriceQuote.Bid == 0 || bestPriceQuote.Ask == 0)
-            {
-                await _log.WriteWarningAsync("QuoteService", "HandleQuote",
-                    "Incoming quote is incorrect: " + (bestPriceQuote?.ToString() ?? "null"));
-                return;
-            }
-
-            _quoteCache.Set(new ExchangeInstrumentQuote
-            {
-                ExchangeName = bestPriceQuote.ExchangeName,
-                Instrument = bestPriceQuote.Instrument,
-                Base = "",
-                Quote = "",
-                Bid = bestPriceQuote.Bid,
-                Ask = bestPriceQuote.Ask
-            });
-
-            var swappedInstrument = SwapInstrument(bestPriceQuote.Instrument);
-            if (bestPriceQuote.ExchangeName == "bitmex" && swappedInstrument != null && swappedInstrument == "USDBTC")
-                _quoteCache.Set(new ExchangeInstrumentQuote
-                {
-                    ExchangeName = bestPriceQuote.ExchangeName,
-                    Instrument = swappedInstrument,
-                    Base = "",
-                    Quote = "",
-                    Bid = bestPriceQuote.Bid,
-                    Ask = bestPriceQuote.Ask
-                });
-        }
-
+        
         /// <summary>
         /// Swaps 6-symbol instruments. just for simplicity.. for USDBTC
         /// </summary>
@@ -74,24 +34,7 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
         {
             return _quoteCache.Get(exchangeName, instrument);
         }
-
-        private ExchangeBestPrice ConvertToBestPriceQuote(OrderBook orderBook)
-        {
-            var ask = GetBestPrice(true, orderBook.Asks);
-            var bid = GetBestPrice(false, orderBook.Bids);
-            
-            return ask == null || bid == null
-                ? null
-                : new ExchangeBestPrice
-            {
-                ExchangeName = orderBook.Source,
-                Instrument = orderBook.AssetPairId,
-                Timestamp = orderBook.Timestamp,
-                Ask = ask.Value,
-                Bid = bid.Value
-            };
-        }
-
+        
         private decimal? GetBestPrice(bool isBuy, IReadOnlyCollection<VolumePrice> prices)
         {
             if (!prices.Any())
