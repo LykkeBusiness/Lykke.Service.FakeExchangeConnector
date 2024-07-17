@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Lykke.Common" Version="7.6.0" />
     <PackageReference Include="Lykke.Snow.Common" Version="3.0.0" />
+    <PackageReference Include="LykkeBiz.RabbitMqBroker" Version="13.10.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lykke.Service.FakeExchangeConnector.Core\Lykke.Service.FakeExchangeConnector.Core.csproj" />
