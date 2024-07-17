@@ -7,7 +7,6 @@ using Lykke.Service.FakeExchangeConnector.Core.Services;
 using Lykke.Service.FakeExchangeConnector.Core.Settings.ServiceSettings;
 using Lykke.Service.FakeExchangeConnector.PeriodicalHandlers;
 using Lykke.Service.FakeExchangeConnector.RabbitPublishers;
-using Lykke.Service.FakeExchangeConnector.RabbitSubscribers;
 using Lykke.Service.FakeExchangeConnector.Services;
 using Lykke.Service.FakeExchangeConnector.Services.Caches;
 using Lykke.Service.FakeExchangeConnector.Services.Services;
@@ -88,8 +87,6 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance();
             
             RegisterPeriodicalHandlers(builder);
-            
-            RegisterRabbitMqSubscribers(builder);
 
             RegisterRabbitMqPublishers(builder);
 
@@ -103,26 +100,6 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance();
         }
         
-        private void RegisterRabbitMqSubscribers(ContainerBuilder builder)
-        {
-            builder.RegisterType<OrderBookSubscriber>()
-                .AsSelf()
-                .SingleInstance()
-                .WithParameter((pi, c) => pi.Name == "correlationManager",
-                    (pi, c) => c.Resolve<RabbitMqCorrelationManager>())
-                .WithParameter((pi, c) => pi.Name == "loggerFactory",
-                    (pi, c) => c.Resolve<ILoggerFactory>())
-                .WithParameters(new[]
-                {
-                    new NamedParameter("connectionString", _settings.Rabbit.ExchangeConnectorQuotes.ConnectionString),
-                    new NamedParameter("exchangeName", _settings.Rabbit.ExchangeConnectorQuotes.ExchangeName),
-                    new NamedParameter("queueName", _settings.Rabbit.ExchangeConnectorQuotes.QueueName),
-                    new NamedParameter("isDurable", false),
-                    new NamedParameter("log", _log),
-                    new NamedParameter("messageFormat", _settings.Rabbit.ExchangeConnectorQuotes.MessageFormat), 
-                });
-        }
-
         private void RegisterRabbitMqPublishers(ContainerBuilder builder)
         {
             builder.RegisterType<ExecutionReportPublisher>()
