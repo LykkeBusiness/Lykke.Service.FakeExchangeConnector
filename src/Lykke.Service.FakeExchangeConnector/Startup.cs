@@ -12,7 +12,6 @@ using Lykke.Service.FakeExchangeConnector.Core.Services;
 using Lykke.Service.FakeExchangeConnector.Core.Settings;
 using Lykke.Service.FakeExchangeConnector.Modules;
 using Lykke.Service.FakeExchangeConnector.PeriodicalHandlers;
-using Lykke.Service.FakeExchangeConnector.RabbitSubscribers;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.Snow.Common.Correlation;
@@ -126,10 +125,6 @@ namespace Lykke.Service.FakeExchangeConnector
                 // NOTE: Service not yet recieve and process requests here
 
                 await ApplicationContainer.Resolve<IStartupManager>().StartAsync();
-
-                //subscribe on rabbits
-                ApplicationContainer.Resolve<OrderBookSubscriber>().Subscribe(
-                    ApplicationContainer.Resolve<IQuoteService>().HandleQuote);
                 
                 //start periodic handlers
                 ApplicationContainer.Resolve<FakeOrderBookHandler>().Start();
