@@ -1,13 +1,17 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Log;
+using Lykke.RabbitMqBroker;
+using Lykke.RabbitMqBroker.Subscriber;
+using Lykke.RabbitMqBroker.Subscriber.Middleware.ErrorHandling;
 using Lykke.Service.FakeExchangeConnector.Core.Caches;
+using Lykke.Service.FakeExchangeConnector.Core.Domain.Trading;
 using Lykke.Service.FakeExchangeConnector.Core.Rabbit;
 using Lykke.Service.FakeExchangeConnector.Core.Services;
 using Lykke.Service.FakeExchangeConnector.Core.Settings.ServiceSettings;
 using Lykke.Service.FakeExchangeConnector.PeriodicalHandlers;
 using Lykke.Service.FakeExchangeConnector.RabbitPublishers;
-using Lykke.Service.FakeExchangeConnector.RabbitSubscribers;
 using Lykke.Service.FakeExchangeConnector.Services;
 using Lykke.Service.FakeExchangeConnector.Services.Caches;
 using Lykke.Service.FakeExchangeConnector.Services.Services;
@@ -87,40 +91,40 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .As<IQuoteService>()
                 .SingleInstance();
             
-            RegisterPeriodicalHandlers(builder);
+          
+            builder.AddRabbitMqConnectionProvider();
+            builder.AddRabbitMqListener<OrderBook, OrderBookMessageHandler>(new RabbitMqSubscriptionSettings
+                {
+                    ConnectionString = _settings.Rabbit.ExchangeConnectorQuotes.ConnectionString,
+                    ExchangeName = _settings.Rabbit.ExchangeConnectorQuotes.ExchangeName,
+                    QueueName = _settings.Rabbit.ExchangeConnectorQuotes.QueueName,
+                    IsDurable = false
+                },ConfigureOrderBookSubscriber)
+                .AddOptions(RabbitMqListenerOptions<OrderBook>.MessagePack.LossAcceptable)
+                .AutoStart();
             
-            RegisterRabbitMqSubscribers(builder);
-
+            RegisterPeriodicalHandlers(builder);
             RegisterRabbitMqPublishers(builder);
 
             builder.Populate(_services);
         }
-
+        private static void ConfigureOrderBookSubscriber(RabbitMqSubscriber<OrderBook> subscriber,
+            IComponentContext сtx)
+        {
+            var loggerFactory = сtx.Resolve<ILoggerFactory>();
+            var correlationManager = сtx.Resolve<RabbitMqCorrelationManager>();
+         
+            subscriber.UseMiddleware(new ExceptionSwallowMiddleware<OrderBook>(loggerFactory.CreateLogger<ExceptionSwallowMiddleware<OrderBook>>()))
+                .UseMiddleware(new ResilientErrorHandlingMiddleware<OrderBook>( loggerFactory.CreateLogger<ResilientErrorHandlingMiddleware<OrderBook>>(),
+                    TimeSpan.FromSeconds(10)))
+                .SetReadHeadersAction(correlationManager.FetchCorrelationIfExists);
+            
+        }
         private void RegisterPeriodicalHandlers(ContainerBuilder builder)
         {
             builder.RegisterType<FakeOrderBookHandler>()
                 .WithParameter(TypedParameter.From(_settings.FakeOrderBookPublishingPeriodMilliseconds))
                 .SingleInstance();
-        }
-        
-        private void RegisterRabbitMqSubscribers(ContainerBuilder builder)
-        {
-            builder.RegisterType<OrderBookSubscriber>()
-                .AsSelf()
-                .SingleInstance()
-                .WithParameter((pi, c) => pi.Name == "correlationManager",
-                    (pi, c) => c.Resolve<RabbitMqCorrelationManager>())
-                .WithParameter((pi, c) => pi.Name == "loggerFactory",
-                    (pi, c) => c.Resolve<ILoggerFactory>())
-                .WithParameters(new[]
-                {
-                    new NamedParameter("connectionString", _settings.Rabbit.ExchangeConnectorQuotes.ConnectionString),
-                    new NamedParameter("exchangeName", _settings.Rabbit.ExchangeConnectorQuotes.ExchangeName),
-                    new NamedParameter("queueName", _settings.Rabbit.ExchangeConnectorQuotes.QueueName),
-                    new NamedParameter("isDurable", false),
-                    new NamedParameter("log", _log),
-                    new NamedParameter("messageFormat", _settings.Rabbit.ExchangeConnectorQuotes.MessageFormat), 
-                });
         }
 
         private void RegisterRabbitMqPublishers(ContainerBuilder builder)
