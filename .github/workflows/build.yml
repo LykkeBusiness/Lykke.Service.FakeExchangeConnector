@@ -55,6 +55,10 @@ jobs:
         id: check_coverage
         run: |
           if [ -f coverage/**/coverage.cobertura.xml ] && [ -s coverage/**/coverage.cobertura.xml ]; then echo "file_exists=true" >> $GITHUB_ENV; else echo "file_exists=false" >> $GITHUB_ENV; fi
+          
+      - name: Print Coverage Report to Console
+        if: env.file_exists == 'true'
+        run: cat coverage/**/coverage.cobertura.xml
       
       - name: Code Coverage Report
         if: env.file_exists == 'true'
