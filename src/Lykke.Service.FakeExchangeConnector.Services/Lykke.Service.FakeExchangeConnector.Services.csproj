@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>Lykke.Service.FakeExchangeConnector.Services</AssemblyName>
@@ -7,8 +7,8 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Lykke.Common" Version="7.6.0" />
-    <PackageReference Include="Lykke.Snow.Common" Version="3.0.0" />
+    <PackageReference Include="Lykke.Common" />
+    <PackageReference Include="Lykke.Snow.Common" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lykke.Service.FakeExchangeConnector.Core\Lykke.Service.FakeExchangeConnector.Core.csproj" />
