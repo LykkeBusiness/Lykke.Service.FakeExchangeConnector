@@ -50,18 +50,8 @@ jobs:
 
       - name: Test
         run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
-        
-      - name: Check for Coverage Report
-        id: check_coverage
-        run: |
-          if [ -f coverage/**/coverage.cobertura.xml ] && [ -s coverage/**/coverage.cobertura.xml ]; then echo "file_exists=true" >> $GITHUB_ENV; else echo "file_exists=false" >> $GITHUB_ENV; fi
-          
-      - name: Print Coverage Report to Console
-        if: env.file_exists == 'true'
-        run: cat coverage/**/coverage.cobertura.xml
-      
+
       - name: Code Coverage Report
-        if: env.file_exists == 'true'
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: coverage/**/coverage.cobertura.xml
