@@ -1,4 +1,4 @@
-## 1.1.0
+## 1.1.0 Nova 2. Delivery 36 (2023-08-31)
 ### What's changed
 * LT-4907: Update nugets.
 
