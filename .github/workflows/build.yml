@@ -38,9 +38,9 @@ jobs:
           path: LykkeBusinessTools
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.101
+          dotnet-version: 6.0.x
 
       - name: Restore dependencies
         run: dotnet restore --configfile LykkeBusinessTools/config/snow/nuget.config
