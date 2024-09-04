@@ -14,16 +14,12 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
     public class QuoteService : IQuoteService
     {
         private readonly IQuoteCache _quoteCache;
-
-        private readonly ILog _log;
-
-        public QuoteService(IQuoteCache quoteCache,
-            ILog log)
+        
+        public QuoteService(IQuoteCache quoteCache)
         {
             _quoteCache = quoteCache;
-            _log = log;
         }
-
+        
         /// <summary>
         /// Swaps 6-symbol instruments. just for simplicity.. for USDBTC
         /// </summary>
@@ -38,24 +34,7 @@ namespace Lykke.Service.FakeExchangeConnector.Services.Services
         {
             return _quoteCache.Get(exchangeName, instrument);
         }
-
-        private ExchangeBestPrice ConvertToBestPriceQuote(OrderBook orderBook)
-        {
-            var ask = GetBestPrice(true, orderBook.Asks);
-            var bid = GetBestPrice(false, orderBook.Bids);
-            
-            return ask == null || bid == null
-                ? null
-                : new ExchangeBestPrice
-            {
-                ExchangeName = orderBook.Source,
-                Instrument = orderBook.AssetPairId,
-                Timestamp = orderBook.Timestamp,
-                Ask = ask.Value,
-                Bid = bid.Value
-            };
-        }
-
+        
         private decimal? GetBestPrice(bool isBuy, IReadOnlyCollection<VolumePrice> prices)
         {
             if (!prices.Any())

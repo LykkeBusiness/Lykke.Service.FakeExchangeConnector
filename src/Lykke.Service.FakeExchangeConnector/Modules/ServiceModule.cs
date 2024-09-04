@@ -99,7 +99,6 @@ namespace Lykke.Service.FakeExchangeConnector.Modules
                 .SingleInstance();
         }
         
-      
         private void RegisterRabbitMqPublishers(ContainerBuilder builder)
         {
             builder.RegisterType<ExecutionReportPublisher>()
