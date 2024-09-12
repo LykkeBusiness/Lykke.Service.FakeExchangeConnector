@@ -1,18 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>Lykke.Service.FakeExchangeConnector.Core</AssemblyName>
     <RootNamespace>Lykke.Service.FakeExchangeConnector.Core</RootNamespace>
     <Version>1.2.0</Version>
-    <LangVersion>8.0</LangVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Domain\" />
     <Folder Include="Services\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Lykke.Common" Version="7.6.0" />
-    <PackageReference Include="LykkeBiz.SettingsReader" Version="6.0.4" />
-    <PackageReference Include="MessagePack" Version="1.9.11" />
+    <PackageReference Include="Lykke.Common" />
+    <PackageReference Include="LykkeBiz.SettingsReader" />
+    <PackageReference Include="MessagePack" />
   </ItemGroup>
 </Project>
