@@ -13,6 +13,7 @@ using Lykke.Service.FakeExchangeConnector.Core.Settings;
 using Lykke.Service.FakeExchangeConnector.Modules;
 using Lykke.Service.FakeExchangeConnector.PeriodicalHandlers;
 using Lykke.SettingsReader;
+using Lykke.SettingsReader.SettingsTemplate;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.Snow.Common.Correlation;
 using Microsoft.AspNetCore.Builder;
@@ -65,9 +66,10 @@ namespace Lykke.Service.FakeExchangeConnector
 
                 builder.RegisterModule(
                     new ServiceModule(
-                        appSettings.Nested(x => x.FakeExchangeConnectorService), 
+                        appSettings.Nested(x => x.FakeExchangeConnectorService),
                         Log));
                 builder.Populate(services);
+                services.AddSettingsTemplateGenerator();
                 ApplicationContainer = builder.Build();
 
                 return new AutofacServiceProvider(ApplicationContainer);
@@ -91,13 +93,16 @@ namespace Lykke.Service.FakeExchangeConnector
                 app.UseLykkeForwardedHeaders();
                 app.UseLykkeMiddleware("FakeExchangeConnector", ex => new { Message = "Technical problem" }, false);
                 app.UseCorrelation();
-                
+
                 app.UseMvc();
                 app.UseSwagger(c =>
                 {
                     c.PreSerializeFilters.Add((swagger, httpReq) =>
                     {
-                        swagger.Servers = new List<OpenApiServer> { new OpenApiServer {Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" }};
+                        swagger.Servers = new List<OpenApiServer>
+                        {
+                            new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}" }
+                        };
                     });
                 });
                 app.UseSwaggerUI(x =>
@@ -106,7 +111,9 @@ namespace Lykke.Service.FakeExchangeConnector
                     x.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
                 });
                 app.UseStaticFiles();
-
+                app.UseEndpoints(builder =>
+                    builder.AddSettingsTemplateEndpoint()
+                );
                 appLifetime.ApplicationStarted.Register(() => StartApplication().GetAwaiter().GetResult());
                 appLifetime.ApplicationStopping.Register(() => StopApplication().GetAwaiter().GetResult());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().GetAwaiter().GetResult());
@@ -125,7 +132,7 @@ namespace Lykke.Service.FakeExchangeConnector
                 // NOTE: Service not yet recieve and process requests here
 
                 await ApplicationContainer.Resolve<IStartupManager>().StartAsync();
-                
+
                 //start periodic handlers
                 ApplicationContainer.Resolve<FakeOrderBookHandler>().Start();
 
@@ -152,6 +159,7 @@ namespace Lykke.Service.FakeExchangeConnector
                 {
                     await Log.WriteFatalErrorAsync(nameof(Startup), nameof(StopApplication), "", ex);
                 }
+
                 throw;
             }
         }
@@ -176,6 +184,7 @@ namespace Lykke.Service.FakeExchangeConnector
                     await Log.WriteFatalErrorAsync(nameof(Startup), nameof(CleanUp), "", ex);
                     (Log as IDisposable)?.Dispose();
                 }
+
                 throw;
             }
         }
@@ -192,15 +201,19 @@ namespace Lykke.Service.FakeExchangeConnector
 
             if (string.IsNullOrEmpty(dbLogConnectionString))
             {
-                consoleLogger.WriteWarningAsync(nameof(Startup), nameof(CreateLogWithSlack), "Table loggger is not inited").Wait();
+                consoleLogger
+                    .WriteWarningAsync(nameof(Startup), nameof(CreateLogWithSlack), "Table loggger is not inited")
+                    .Wait();
                 return aggregateLogger;
             }
 
             if (dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}"))
-                throw new InvalidOperationException($"LogsConnString {dbLogConnectionString} is not filled in settings");
+                throw new InvalidOperationException(
+                    $"LogsConnString {dbLogConnectionString} is not filled in settings");
 
             var persistenceManager = new LykkeLogToAzureStoragePersistenceManager(
-                AzureTableStorage<LogEntity>.Create(dbLogConnectionStringManager, "FakeExchangeConnectorLog", consoleLogger),
+                AzureTableStorage<LogEntity>.Create(dbLogConnectionStringManager, "FakeExchangeConnectorLog",
+                    consoleLogger),
                 consoleLogger);
 
             LykkeLogToAzureSlackNotificationsManager slackNotificationsManager = null;
