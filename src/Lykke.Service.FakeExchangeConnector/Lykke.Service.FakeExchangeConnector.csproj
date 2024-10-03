@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <AssemblyName>Lykke.Service.FakeExchangeConnector</AssemblyName>
     <RootNamespace>Lykke.Service.FakeExchangeConnector</RootNamespace>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
