@@ -132,10 +132,9 @@ namespace Lykke.Service.FakeExchangeConnector
             try
             {
                 // NOTE: Service not yet recieve and process requests here
+                ApplicationContainer.Resolve<AssemblyLogger>().StartLogging();
 
                 await ApplicationContainer.Resolve<IStartupManager>().StartAsync();
-                
-                ApplicationContainer.Resolve<AssemblyLogger>().StartLogging();
 
                 //start periodic handlers
                 ApplicationContainer.Resolve<FakeOrderBookHandler>().Start();
