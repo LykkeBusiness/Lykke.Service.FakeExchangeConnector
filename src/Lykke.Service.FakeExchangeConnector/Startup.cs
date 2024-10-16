@@ -14,7 +14,6 @@ using Lykke.Service.FakeExchangeConnector.Modules;
 using Lykke.Service.FakeExchangeConnector.PeriodicalHandlers;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
-using Lykke.Snow.Common.AssemblyLogging;
 using Lykke.Snow.Common.Correlation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,7 +44,6 @@ namespace Lykke.Service.FakeExchangeConnector
         {
             try
             {
-                services.AddAssemblyLogger();
                 services.AddControllers(o => o.EnableEndpointRouting = false)
                     .AddNewtonsoftJson(options =>
                     {
@@ -125,6 +123,7 @@ namespace Lykke.Service.FakeExchangeConnector
             try
             {
                 // NOTE: Service not yet recieve and process requests here
+
                 await ApplicationContainer.Resolve<IStartupManager>().StartAsync();
                 
                 //start periodic handlers
