@@ -10,6 +10,7 @@ using Lykke.Service.FakeExchangeConnector.Core;
 using Lykke.Service.FakeExchangeConnector.Core.Domain;
 using Lykke.Service.FakeExchangeConnector.Core.Rabbit;
 using Lykke.Snow.Common.Correlation.RabbitMq;
+using MessagePack;
 using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
@@ -81,7 +82,7 @@ namespace Lykke.Service.FakeExchangeConnector.RabbitPublishers
                 case RabbitMessageFormat.Json:
                     return new JsonMessageSerializer<T>();
                 case RabbitMessageFormat.MessagePack:
-                    return new MessagePackMessageSerializer<T>();
+                    return new MessagePackMessageSerializer<T>((IFormatterResolver)null);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
