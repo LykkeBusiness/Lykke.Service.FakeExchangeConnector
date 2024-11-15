@@ -1,3 +1,8 @@
+## 1.4.0 - Nova 2. Delivery 47 (November 15, 2024)
+### What's changed
+* LT-5856: Update messagepack to 2.x version.
+
+
 ## 1.3.0 - Nova 2. Delivery 46 (September 26, 2024)
 ### What's changed
 * LT-5604: Migrate to net 8.
